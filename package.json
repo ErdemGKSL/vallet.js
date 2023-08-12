@@ -1,0 +1,25 @@
+{
+  "name": "vallet.js",
+  "version": "0.0.1",
+  "description": "Vallet api entegrasyonu için geliştirilen modul.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc"
+  },
+  "keywords": [
+    "vallet",
+    "api"
+  ],
+  "author": "ErdemGKSL",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.4.10",
+    "express": "^4.18.2",
+    "nativescript-dev-typescript": "^0.10.0",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "stuffs": "^0.1.27"
+  }
+}
