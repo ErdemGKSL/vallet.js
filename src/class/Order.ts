@@ -20,7 +20,7 @@ export interface OrderConstructorContext {
 interface Buyer {
   name: string;
   surname: string;
-  GsmNumber: string;
+  gsmNumber: string;
   email: string;
   address: string;
   country: string;
@@ -90,7 +90,7 @@ export class Order implements Required<OrderConstructorContext> {
 
     body.append("buyerName", this.buyer.name);
     body.append("buyerSurName", this.buyer.surname);
-    body.append("buyerGsmNo", this.buyer.GsmNumber);
+    body.append("buyerGsmNo", this.buyer.gsmNumber);
     body.append("buyerEmail", this.buyer.email);
     body.append("buyerAdress", this.buyer.address);
     body.append("buyerCountry", this.buyer.country);
