@@ -1,5 +1,6 @@
 import stuffs from "stuffs";
 import { Order, OrderConstructorContext } from "./Order";
+import { CallbackManager } from "./CallbackManager";
 
 interface ClientConstructorContext {
   username: string;
@@ -30,7 +31,7 @@ interface ClientConstructorDefaults {
   currency?: "TRY" | "USD" | "EUR" | "GBP" | "IRR" | "RUB";
 }
 
-export class Client {
+export class Client extends CallbackManager {
   username: string;
   password: string;
   shopCode: string;
@@ -38,6 +39,7 @@ export class Client {
   callbackOkUrl: URL;
   defaults?: Required<ClientConstructorDefaults>;
   constructor(ctx: ClientConstructorContext) {
+    super();
     this.username = ctx.username;
     this.password = ctx.password;
     this.shopCode = ctx.shopCode;
