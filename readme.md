@@ -17,7 +17,11 @@ const client = new Client({
 
 client.createOrder({
   productName: string | undefined,
-  products: Product[],
+  products: {
+    productName: string;
+    productPrice: number;
+    productType: "DIJITAL_URUN" | "FIZIKSEL_URUN" | undefined;
+  }[],
   productType: "DIJITAL_URUN" | "FIZIKSEL_URUN" | undefined,
   currency: "TRY" | "USD" | "EUR" | "GBP" | "IRR" | "RUB" | undefined,
   orderId: string,
