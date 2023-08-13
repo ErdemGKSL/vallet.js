@@ -1,6 +1,6 @@
 {
   "name": "vallet.js",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "Vallet api entegrasyonu için geliştirilen modul.",
   "main": "dist/index.js",
   "scripts": {

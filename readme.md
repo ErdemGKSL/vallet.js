@@ -13,7 +13,7 @@ const client = new Client({
     productName: string | undefined,
     productType: "DIJITAL_URUN" | "FIZIKSEL_URUN" | undefined,
     locale: "tr" | "en" | "de" | "ru" | undefined,
-    currency: "TRY" | "USD" | "EUR" | "GBP" | "IRR" | "RUB" | undefined,
+    currency: "TRY" | "USD" | "EUR" | undefined,
   };
 });
 
@@ -25,7 +25,7 @@ client.createOrder({
     productType: "DIJITAL_URUN" | "FIZIKSEL_URUN" | undefined;
   }],
   productType: "DIJITAL_URUN" | "FIZIKSEL_URUN" | undefined,
-  currency: "TRY" | "USD" | "EUR" | "GBP" | "IRR" | "RUB" | undefined,
+  currency: "TRY" | "USD" | "EUR" | undefined,
   orderId: string,
   locale: "tr" | "en" | "de" | "ru" | undefined,
   conversationId: string | undefined,
