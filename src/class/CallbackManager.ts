@@ -1,12 +1,30 @@
 import { EventEmitter } from "stream";
 import { Router } from "express";
+
+type paymentStatus = "paymentWait" | "paymentVerification" | "paymentOk" | "paymentNotPaid";
+
 interface Callback {
   status: "success" | "error";
+  /**
+   * @description OrderID,currency,orderPrice,productsTotalPrice,productType,shopCode,MAGAZA_HASH değişkenlerinden birleştirilerek oluşturulan metnin işyeri hash kodunuzla şifrelenmiş halidir. Örnek Kod İnceleyiniz.
+   */
   hash: string;
+  /**
+   * @type Ödenen sipariş tutarı
+   */
   paymentAmount: number;
   paymentType: "KART" | "BANKA_HAVALE" | "YURT_DISI";
+  /**
+   * @description Sipariş oluştururken geri cevapta olmasını istediğiniz veri
+   */
   conversationId?: string;
+  /**
+   * @description Siparişi oluştururken gönderdiğiniz, sisteminize ait sipariş numarası
+   */
   orderId: string;
+  /**
+   * @description Mağaza kodunuz
+   */
   shopCode: string;
 }
 
@@ -20,14 +38,26 @@ export class CallbackManager extends EventEmitter {
   public override on(event: "paymentOk", listener: (data: Callback) => void): this;
   public override on(event: "paymentNotPaid", listener: (data: Callback) => void): this;
 
-  public override on(event: string, listener: (...args: Callback[]) => void): this {
+  public override on(event: paymentStatus, listener: (...args: Callback[]) => void): this {
     return super.on(event, listener);
   }
+
+  public override emit(event: "paymentWait", data: Callback): boolean;
+  public override emit(event: "paymentVerification", data: Callback): boolean;
+  public override emit(event: "paymentOk", data: Callback): boolean;
+  public override emit(event: "paymentNotPaid", data: Callback): boolean;
+
+  public override emit(event: paymentStatus, ...args: Callback[]): boolean {
+    return super.emit(event, ...args);
+  }
+
   
   bind(router: Router, path: string) {
     router.post(path, (req, res) => {
-      const data = req.body;
-      this.emit(data.paymentStatus, data);
+      const data = (req.body as (Callback & { paymentStatus: paymentStatus }));
+      const status = data.paymentStatus;
+      delete data.paymentStatus;
+      this.emit(status as any, data);
       res.send({
         ok: true
       })

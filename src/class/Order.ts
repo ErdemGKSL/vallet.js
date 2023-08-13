@@ -1,17 +1,31 @@
 import { Client } from "./Client";
+import Crypto from "crypto";
 
 export interface OrderConstructorContext {
   /**
-   * @description Maximum 200 characters
+   * @description Sipariş yada Fatura Adı (Maximum 200 characters)
    */
   productName?: string;
+  /**
+   * @description Sepetteki ürünlerin listesi
+   */
   products: Product[];
+  /**
+   * @description Ürünleriniz Kargo yoluyla gönderilecekse kesinlikle fiziksel ürün seçilmelidir.
+   */
   productType?: "DIJITAL_URUN" | "FIZIKSEL_URUN";
-  currency?: "TRY" | "USD" | "EUR" | "GBP" | "IRR" | "RUB";
+  /**
+   * @description Para Birimi TRY,EUR,USD Varsayılan Değer: TRY
+   * @default "TRY"
+   */
+  currency?: "TRY" | "USD" | "EUR";
+  /**
+   * @description İlgili siparişinizin sizin sisteminiz tarafındaki sipariş ID yada Sipariş Kodu. Ödenmemiş bir sipariş yada benzersiz olmalıdır. (Maximum 50 characters)
+   */
   orderId: string;
   locale?: "tr" | "en" | "de" | "ru";
   /**
-   * @description Maximum 200 characters
+   * @description İstekte gönderilirse response olarak size geri döndürülür. Request/response eşlemesi yapmak için kullanılır. (Maximum 200 characters)
    */
   conversationId?: string;
   buyer: Buyer;
@@ -38,7 +52,7 @@ export class Order implements Required<OrderConstructorContext> {
   productName: string;
   products: Product[];
   productType: "DIJITAL_URUN" | "FIZIKSEL_URUN";
-  currency: "TRY" | "USD" | "EUR" | "GBP" | "IRR" | "RUB";
+  currency: "TRY" | "USD" | "EUR";
   orderId: string;
   locale: "tr" | "en" | "de" | "ru";
   conversationId: string;
@@ -99,6 +113,8 @@ export class Order implements Required<OrderConstructorContext> {
 
     body.append("callbackOkUrl", this.client.callbackOkUrl.toString());
     body.append("callbackFailUrl", this.client.callbackFailUrl.toString());
+
+    body.append("hash", Crypto.createHash("sha256").update(`${this.client.username}${this.client.password}${this.client.shopCode}${this.orderId}${this.currency}${totalPrice}${totalPrice}${this.productType}${this.client.callbackOkUrl.toString()}${this.client.callbackFailUrl.toString()}`).digest("hex"));
 
     const response = await fetch("https://www.vallet.com.tr/api/v1/create-payment-link", {
       method: "POST",

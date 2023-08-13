@@ -28,7 +28,7 @@ interface ClientConstructorDefaults {
   /**
    * @default "TRY"
    */
-  currency?: "TRY" | "USD" | "EUR" | "GBP" | "IRR" | "RUB";
+  currency?: "TRY" | "USD" | "EUR";
 }
 
 export class Client extends CallbackManager {
