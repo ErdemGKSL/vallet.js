@@ -114,7 +114,7 @@ export class Order implements Required<OrderConstructorContext> {
     body.append("callbackOkUrl", this.client.callbackOkUrl.toString());
     body.append("callbackFailUrl", this.client.callbackFailUrl.toString());
 
-    body.append("hash", Crypto.createHash("sha256").update(`${this.client.username}${this.client.password}${this.client.shopCode}${this.orderId}${this.currency}${totalPrice}${totalPrice}${this.productType}${this.client.callbackOkUrl.toString()}${this.client.callbackFailUrl.toString()}`).digest("hex"));
+    body.append("hash", Crypto.createHash("sha256").update(`${this.client.username}${this.client.password}${this.client.shopCode}${this.orderId}${this.currency}${totalPrice}${totalPrice}${this.productType}${this.client.callbackOkUrl.toString()}${this.client.callbackFailUrl.toString()}`).digest("base64"));
 
     const response = await fetch("https://www.vallet.com.tr/api/v1/create-payment-link", {
       method: "POST",
