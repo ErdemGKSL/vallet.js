@@ -14,7 +14,7 @@ const client = new Client({
     productType: "DIJITAL_URUN" | "FIZIKSEL_URUN" | undefined,
     locale: "tr" | "en" | "de" | "ru" | undefined,
     currency: "TRY" | "USD" | "EUR" | undefined,
-  };
+  }
 });
 
 client.createOrder({
