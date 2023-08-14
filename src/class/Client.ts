@@ -36,8 +36,12 @@ export class Client extends CallbackManager {
   username: string;
   password: string;
   shopCode: string;
-  callbackFailUrl: URL;
   callbackOkUrl: URL;
+  callbackFailUrl: URL;
+  /** @private */
+  callbackOkUrlString: string;
+  /** @private */
+  callbackFailUrlString: string;
   apiHash: string;
   defaults?: Required<ClientConstructorDefaults>;
   constructor(ctx: ClientConstructorContext) {
@@ -46,8 +50,10 @@ export class Client extends CallbackManager {
     this.password = ctx.password;
     this.shopCode = ctx.shopCode;
     this.apiHash = ctx.apiHash;
-    this.callbackFailUrl = new URL(ctx.callbackFailUrl);
     this.callbackOkUrl = new URL(ctx.callbackOkUrl);
+    this.callbackFailUrl = new URL(ctx.callbackFailUrl);
+    this.callbackOkUrlString = ctx.callbackOkUrl;
+    this.callbackFailUrlString = ctx.callbackFailUrl;
     this.defaults = stuffs.defaultify(ctx.defaults ?? {}, {
       productName: "Ödeme",
       productType: "DIJITAL_URUN",

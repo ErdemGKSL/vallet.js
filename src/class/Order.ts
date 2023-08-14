@@ -95,9 +95,12 @@ export class Order implements Required<OrderConstructorContext> {
     const totalPrice = this.products.reduce((acc, product) => acc + product.productPrice, 0);
 
     body.append("productName", this.productName);
-    body.append("productType", this.productType);
+
+    body.append("hash", Crypto.createHash("sha256").update(`${this.client.username}${this.client.password}${this.client.shopCode}${this.orderId}${this.currency}${totalPrice}${totalPrice}${this.productType}${this.client.callbackOkUrlString}${this.client.callbackFailUrlString}${this.client.apiHash}`).digest("base64"));
 
     body.append("productData", JSON.stringify(this.products));
+    body.append("productType", this.productType);
+
     body.append("productsTotalPrice", totalPrice.toString());
     body.append("orderPrice", totalPrice.toString());
     body.append("currency", this.currency);
@@ -116,10 +119,9 @@ export class Order implements Required<OrderConstructorContext> {
     body.append("buyerCity", this.buyer.city);
     body.append("buyerDistrict", this.buyer.district);
 
-    body.append("callbackOkUrl", this.client.callbackOkUrl.toString());
-    body.append("callbackFailUrl", this.client.callbackFailUrl.toString());
+    body.append("callbackOkUrl", this.client.callbackOkUrlString);
+    body.append("callbackFailUrl", this.client.callbackFailUrlString);
 
-    body.append("hash", Crypto.createHash("sha256").update(`${this.client.username}${this.client.password}${this.client.shopCode}${this.orderId}${this.currency}${totalPrice}${totalPrice}${this.productType}${this.client.callbackOkUrl.toString()}${this.client.callbackFailUrl.toString()}${this.client.apiHash}`).digest("base64"));
 
     const response = await fetch("https://www.vallet.com.tr/api/v1/create-payment-link", {
       method: "POST",
