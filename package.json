@@ -1,6 +1,6 @@
 {
   "name": "vallet.js",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Vallet api entegrasyonu için geliştirilen modul.",
   "main": "dist/index.js",
   "scripts": {
@@ -14,9 +14,9 @@
   "author": "ErdemGKSL",
   "license": "MIT",
   "devDependencies": {
+    "@types/express": "^4.17.17",
     "@types/node": "^20.4.10",
     "nativescript-dev-typescript": "^0.10.0",
-    "@types/express": "^4.17.17",
     "typescript": "^5.1.6"
   },
   "repository": {
@@ -29,6 +29,7 @@
   "homepage": "https://github.com/ErdemGKSL/vallet.js#readme",
   "dependencies": {
     "express": "^4.18.2",
-    "stuffs": "^0.1.27"
+    "stuffs": "^0.1.27",
+    "tslib": "^2.6.1"
   }
 }
