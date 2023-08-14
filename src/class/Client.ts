@@ -8,6 +8,7 @@ interface ClientConstructorContext {
   shopCode: string;
   callbackFailUrl: string;
   callbackOkUrl: string;
+  apiHash: string;
   defaults?: ClientConstructorDefaults;
 }
 
@@ -37,12 +38,14 @@ export class Client extends CallbackManager {
   shopCode: string;
   callbackFailUrl: URL;
   callbackOkUrl: URL;
+  apiHash: string;
   defaults?: Required<ClientConstructorDefaults>;
   constructor(ctx: ClientConstructorContext) {
     super();
     this.username = ctx.username;
     this.password = ctx.password;
     this.shopCode = ctx.shopCode;
+    this.apiHash = ctx.apiHash;
     this.callbackFailUrl = new URL(ctx.callbackFailUrl);
     this.callbackOkUrl = new URL(ctx.callbackOkUrl);
     this.defaults = stuffs.defaultify(ctx.defaults ?? {}, {
