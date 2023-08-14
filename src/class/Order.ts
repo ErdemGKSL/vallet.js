@@ -93,7 +93,10 @@ export class Order implements Required<OrderConstructorContext> {
 
     const totalPrice = this.products.reduce((acc, product) => acc + product.productPrice, 0);
 
-    body.append("productDate", JSON.stringify(this.products));
+    body.append("productName", this.productName);
+    body.append("productType", this.productType);
+
+    body.append("productData", JSON.stringify(this.products));
     body.append("productsTotalPrice", totalPrice.toString());
     body.append("orderPrice", totalPrice.toString());
     body.append("currency", this.currency);
