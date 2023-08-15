@@ -68,6 +68,11 @@ export class Client extends CallbackManager {
     return order;
   }
 
+  /**
+   * @param args string arguments
+   * @example
+   * const hash = await client.fetchHash(client.username, client.password, client.shopCode, client.apiHash);
+   */
   async fetchHash(...args: string[]): Promise<string> {
     const total = args.join("");
 
