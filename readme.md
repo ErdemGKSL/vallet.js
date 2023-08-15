@@ -9,6 +9,7 @@ const client = new Client({
   shopCode: string,
   callbackFailUrl: string,
   callbackOkUrl: string,
+  apiHash: string,
   defaults: {
     productName: string | undefined,
     productType: "DIJITAL_URUN" | "FIZIKSEL_URUN" | undefined,
