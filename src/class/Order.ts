@@ -96,7 +96,22 @@ export class Order implements Required<OrderConstructorContext> {
 
     body.append("productName", this.productName);
 
-    body.append("hash", Crypto.createHash("sha256").update(`${this.client.username}${this.client.password}${this.client.shopCode}${this.orderId}${this.currency}${totalPrice}${totalPrice}${this.productType}${this.client.callbackOkUrlString}${this.client.callbackFailUrlString}${this.client.apiHash}`).digest("base64"));
+    // Crypto.createHash("sha256").update(`${this.client.username}${this.client.password}${this.client.shopCode}${this.orderId}${this.currency}${totalPrice}${totalPrice}${this.productType}${this.client.callbackOkUrlString}${this.client.callbackFailUrlString}${this.client.apiHash}`).digest("base64")
+    body.append("hash",
+      await this.client.fetchHash(
+        this.client.username,
+        this.client.password,
+        this.client.shopCode,
+        this.orderId,
+        this.currency,
+        totalPrice.toString(),
+        totalPrice.toString(),
+        this.productType,
+        this.client.callbackOkUrlString,
+        this.client.callbackFailUrlString,
+        this.client.apiHash
+      )
+    );
 
     body.append("productData", JSON.stringify(this.products));
     body.append("productType", this.productType);
