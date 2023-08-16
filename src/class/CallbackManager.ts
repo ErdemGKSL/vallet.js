@@ -33,22 +33,12 @@ export class CallbackManager extends EventEmitter {
     super();
   }
 
-  public override on(event: "paymentWait", listener: (data: Callback) => void): this;
-  public override on(event: "paymentVerification", listener: (data: Callback) => void): this;
-  public override on(event: "paymentOk", listener: (data: Callback) => void): this;
-  public override on(event: "paymentNotPaid", listener: (data: Callback) => void): this;
-
-  public override on(event: paymentStatus, listener: (...args: Callback[]) => void): this {
+  public override on(event: paymentStatus, listener: (data: Callback) => void): this {
     return super.on(event, listener);
   }
 
-  public override emit(event: "paymentWait", data: Callback): boolean;
-  public override emit(event: "paymentVerification", data: Callback): boolean;
-  public override emit(event: "paymentOk", data: Callback): boolean;
-  public override emit(event: "paymentNotPaid", data: Callback): boolean;
-
-  public override emit(event: paymentStatus, ...args: Callback[]): boolean {
-    return super.emit(event, ...args);
+  public override emit(event: paymentStatus, data: Callback): boolean {
+    return super.emit(event, data);
   }
 
   
@@ -60,7 +50,7 @@ export class CallbackManager extends EventEmitter {
       res.send({
         ok: true
       });
-      this.emit(status as any, data);
+      this.emit(status, data);
     });
   }
 }
