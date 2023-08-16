@@ -40,10 +40,9 @@ export class CallbackManager extends EventEmitter {
   public override emit(event: paymentStatus, data: Callback): boolean {
     return super.emit(event, data);
   }
-
   
-  bind(router: Router | Express, path: string) {
-    (router as any).post(path, (req, res) => {
+  bind<T extends Router | Express>(router: T, path: string): T {
+    return (router as any).post(path, (req, res) => {
       const data = (req.body as (Callback & { paymentStatus: paymentStatus }));
       const status = data.paymentStatus;
       delete data.paymentStatus;
