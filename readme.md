@@ -45,6 +45,7 @@ client.createOrder({
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 client.bind(app, "/vallet/callback");
 

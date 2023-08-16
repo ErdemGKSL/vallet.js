@@ -57,10 +57,10 @@ export class CallbackManager extends EventEmitter {
       const data = (req.body as (Callback & { paymentStatus: paymentStatus }));
       const status = data.paymentStatus;
       delete data.paymentStatus;
-      this.emit(status as any, data);
       res.send({
         ok: true
-      })
+      });
+      this.emit(status as any, data);
     });
   }
 }
