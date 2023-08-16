@@ -1,6 +1,7 @@
 import stuffs from "stuffs";
 import { Order, OrderConstructorContext } from "./Order";
 import { CallbackManager } from "./CallbackManager";
+import Crypto from "crypto";
 
 interface ClientConstructorContext {
   username: string;
@@ -71,31 +72,9 @@ export class Client extends CallbackManager {
   /**
    * @param args string arguments
    * @example
-   * const hash = await client.fetchHash(client.username, client.password, client.shopCode, client.apiHash);
+   * const hash = client.calculateHash(client.username, client.password, client.shopCode, client.apiHash);
    */
-  async fetchHash(...args: string[]): Promise<string> {
-    const total = args.join("");
-
-    const headers = new Headers();
-    const body = new URLSearchParams();
-
-    headers.append("Content-Type", "application/x-www-form-urlencoded");
-    headers.append("Referer", this.callbackOkUrl.host);
-
-    body.append("userName", this.username);
-    body.append("password", this.password);
-    body.append("shopCode", this.shopCode);
-
-    body.append("string", total);
-
-    const res = await fetch("https://www.vallet.com.tr/api/v1/generate-hash", {
-      method: "POST",
-      headers,
-      body
-    }).then(res => res.json());
-
-    if (res.status !== "success") throw new Error(res.errorMessage);
-
-    return res.hash_string;
+  calculateHash(...args: string[]): string {
+    return Crypto.createHash("sha1").update(args.join("")).digest("base64")
   }
 };

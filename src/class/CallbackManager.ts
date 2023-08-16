@@ -1,5 +1,5 @@
 import { EventEmitter } from "stream";
-import { Router } from "express";
+import { Router, Express } from "express";
 
 type paymentStatus = "paymentWait" | "paymentVerification" | "paymentOk" | "paymentNotPaid";
 
@@ -52,8 +52,8 @@ export class CallbackManager extends EventEmitter {
   }
 
   
-  bind(router: Router, path: string) {
-    router.post(path, (req, res) => {
+  bind(router: Router | Express, path: string) {
+    (router as any).post(path, (req, res) => {
       const data = (req.body as (Callback & { paymentStatus: paymentStatus }));
       const status = data.paymentStatus;
       delete data.paymentStatus;

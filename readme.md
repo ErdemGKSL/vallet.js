@@ -1,7 +1,7 @@
 ### Örnek
 ```js
 const { Client } = require("vallet.js");
-const { Router } = require("express");
+const express = require("express");
 
 const client = new Client({
   username: string,
@@ -42,9 +42,11 @@ client.createOrder({
   }
 });
 
-const router = new Router();
+const app = express();
 
-client.bind(router, "/vallet/callback");
+app.use(express.urlencoded({ extended: true }));
+
+client.bind(app, "/vallet/callback");
 
 client.on("paymentOk", (data) => {
   console.log(data);
