@@ -3,22 +3,21 @@ import { Order, OrderConstructorContext } from "./Order";
 import { OrderCollection } from "./OrderCollection";
 
 interface OrderManagerConstructorContext {
-  getOrders?: () => Promise<OrderConstructorContext[]> | OrderConstructorContext[];
+  getOrders?: () => Promise<OrderConstructorContext[]>;
   saveOrders?: (orders: OrderConstructorContext[], added?: OrderConstructorContext, removed?: OrderConstructorContext) => Promise<void> | void;
 }
 
 export class OrderManager {
-  getOrders: () => Promise<OrderConstructorContext[]> | OrderConstructorContext[];
+  getOrders: () => Promise<OrderConstructorContext[]>;
   saveOrders: (orders: OrderConstructorContext[], added?: OrderConstructorContext, removed?: OrderConstructorContext) => Promise<void> | void;
   cache: OrderCollection;
   constructor(ctx: OrderManagerConstructorContext, private client: Client) {
-    this.getOrders = ctx.getOrders ?? (() => []);
+    this.getOrders = ctx.getOrders ?? (async () => []);
     this.saveOrders = ctx.saveOrders ?? (() => {});
     this.cache = new OrderCollection([]);
-    (async () => {
-      const orders = await this.getOrders();
+    this.getOrders().then(orders => {
       this.cache = new OrderCollection(orders.map(order => new Order(this.client, order)));
-    })();
+    });
   }
 
   async add(order: Order): Promise<Order> {

@@ -14,7 +14,7 @@ interface ClientConstructorContext {
   apiHash: string;
   defaults?: ClientConstructorDefaults;
   data?: {
-    getOrders?: () => Promise<Required<OrderConstructorContext>[]> | Required<OrderConstructorContext>[];
+    getOrders?: () => Promise<Required<OrderConstructorContext>[]>;
     saveOrders?: (orders: Required<OrderConstructorContext>[], added?: OrderConstructorContext, removed?: OrderConstructorContext) => Promise<void> | void;
   };
 }
