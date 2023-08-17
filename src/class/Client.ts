@@ -2,6 +2,8 @@ import stuffs from "stuffs";
 import { Order, OrderConstructorContext } from "./Order";
 import { CallbackManager } from "./CallbackManager";
 import Crypto from "crypto";
+import { OrderManager } from "./OrderManager";
+import { Router, Express } from "express";
 
 interface ClientConstructorContext {
   username: string;
@@ -11,7 +13,13 @@ interface ClientConstructorContext {
   callbackOkUrl: string;
   apiHash: string;
   defaults?: ClientConstructorDefaults;
+  data?: {
+    getOrders?: () => Promise<Required<OrderConstructorContext>[]> | Required<OrderConstructorContext>[];
+    saveOrders?: (orders: Required<OrderConstructorContext>[], added?: OrderConstructorContext, removed?: OrderConstructorContext) => Promise<void> | void;
+  };
 }
+
+
 
 interface ClientConstructorDefaults {
   /**
@@ -44,6 +52,9 @@ export class Client extends CallbackManager {
   /** @private */
   callbackFailUrlString: string;
   apiHash: string;
+
+  orders: OrderManager;
+
   defaults?: Required<ClientConstructorDefaults>;
   constructor(ctx: ClientConstructorContext) {
     super();
@@ -55,6 +66,8 @@ export class Client extends CallbackManager {
     this.callbackFailUrl = new URL(ctx.callbackFailUrl);
     this.callbackOkUrlString = ctx.callbackOkUrl;
     this.callbackFailUrlString = ctx.callbackFailUrl;
+    
+    this.orders = new OrderManager(ctx.data ?? {}, this);
     this.defaults = stuffs.defaultify(ctx.defaults ?? {}, {
       productName: "Ödeme",
       productType: "DIJITAL_URUN",
@@ -67,6 +80,10 @@ export class Client extends CallbackManager {
     const order = new Order(this, ctx);
     await order.create();
     return order;
+  }
+
+  override bind<T extends Router | Express>(router: T, path: string): T {
+    return super.bind(router, path, this);
   }
 
   /**

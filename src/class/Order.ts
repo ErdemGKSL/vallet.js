@@ -1,5 +1,6 @@
 import { Client } from "./Client";
 import Crypto from "crypto";
+import { OrderManager } from "./OrderManager";
 
 export interface OrderConstructorContext {
   /**
@@ -77,6 +78,8 @@ export class Order implements Required<OrderConstructorContext> {
       if (product.productName.length > 200) throw new Error(`[Order] products[${i}].productName cannot be longer than 200 characters`);
       if (!product.productType) product.productType = this.productType;
     });
+
+    this.client.orders.add(this);
   }
 
   async create(): Promise<Order> {
@@ -151,5 +154,22 @@ export class Order implements Required<OrderConstructorContext> {
     this.created = true;
 
     return this;
+  }
+
+  toJSON(): Required<OrderConstructorContext> {
+    return {
+      productName: this.productName,
+      products: this.products,
+      productType: this.productType,
+      currency: this.currency,
+      orderId: this.orderId,
+      locale: this.locale,
+      conversationId: this.conversationId,
+      buyer: this.buyer
+    };
+  }
+
+  static fromJSON(client: Client, json: Required<OrderConstructorContext>): Order {
+    return new Order(client, json);
   }
 }

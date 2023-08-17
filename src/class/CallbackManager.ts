@@ -1,5 +1,7 @@
 import { EventEmitter } from "stream";
 import { Router, Express } from "express";
+import { Order } from "./Order";
+import { Client } from "./Client";
 
 type paymentStatus = "paymentWait" | "paymentVerification" | "paymentOk" | "paymentNotPaid";
 
@@ -33,15 +35,15 @@ export class CallbackManager extends EventEmitter {
     super();
   }
 
-  public override on(event: paymentStatus, listener: (data: Callback) => void): this {
+  public override on(event: paymentStatus, listener: (order: Order, data: Callback) => void): this {
     return super.on(event, listener);
   }
 
-  public override emit(event: paymentStatus, data: Callback): boolean {
+  public override emit(event: paymentStatus, order: Order, data: Callback): boolean {
     return super.emit(event, data);
   }
   
-  bind<T extends Router | Express>(router: T, path: string): T {
+  bind<T extends Router | Express>(router: T, path: string, client: Client): T {
     return (router as any).post(path, (req, res) => {
       const data = (req.body as (Callback & { paymentStatus: paymentStatus }));
       const status = data.paymentStatus;
@@ -49,7 +51,7 @@ export class CallbackManager extends EventEmitter {
       res.send({
         ok: true
       });
-      this.emit(status, data);
+      this.emit(status, client.orders.cache.get(data.orderId), data);
     });
   }
 }
