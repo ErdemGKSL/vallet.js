@@ -32,7 +32,7 @@ export interface OrderConstructorContext {
   buyer: Buyer;
 }
 
-interface Buyer {
+export interface Buyer {
   name: string;
   surname: string;
   gsmNumber: string;
@@ -44,7 +44,7 @@ interface Buyer {
   ip: string;
 }
 
-interface Product {
+export interface Product {
   productName: string;
   productPrice: number;
   productType?: "DIJITAL_URUN" | "FIZIKSEL_URUN";
@@ -60,8 +60,10 @@ export class Order implements Required<OrderConstructorContext> {
   conversationId: string;
   buyer: Buyer;
   created: boolean = false;
+  refunded: boolean = false;
   paymentUrl: URL;
   valletId: number;
+
   constructor(private client: Client, ctx: OrderConstructorContext) {
     this.productName = ctx.productName ?? this.client.defaults.productName;
     this.products = ctx.products;
@@ -156,7 +158,56 @@ export class Order implements Required<OrderConstructorContext> {
     return this;
   }
 
-  toJSON(): Required<OrderConstructorContext> {
+  async refund(amount?: number): Promise<Order> {
+    if (!this.created) throw new Error("Order not created");
+    if (this.refunded) throw new Error("Order already refunded");
+
+    const headers = new Headers();
+    const body = new URLSearchParams();
+
+    headers.append("Content-Type", "application/x-www-form-urlencoded");
+    headers.append("Referer", this.client.callbackOkUrl.host);
+
+    body.append("userName", this.client.username);
+    body.append("password", this.client.password);
+    body.append("shopCode", this.client.shopCode);
+
+    body.append("valletOrderId", this.valletId.toString());
+    body.append("orderId", this.orderId);
+
+    const totalPrice = this.products.reduce((acc, product) => acc + product.productPrice, 0);
+    const amountStr = amount?.toString() ?? totalPrice.toString();
+
+    body.append("amount", amountStr);
+
+    body.append("hash",
+      this.client.calculateHash(
+        this.client.username,
+        this.client.password,
+        this.client.shopCode,
+        this.valletId.toString(),
+        this.orderId,
+        amountStr,
+        this.client.apiHash
+      )
+    );
+
+    const data = await fetch("https://www.vallet.com.tr/api/v1/create-refund", {
+      method: "POST",
+      headers,
+      body
+    }).then(res => res.json());
+
+    if (data?.status !== "success") throw {
+      message: data?.errorMessage,
+      data
+    };
+
+    if (data?.status === "success") this.refunded = true;
+    return this;
+  }
+
+  toJSON(): Required<OrderConstructorContext & { created: boolean, refunded: boolean }> {
     return {
       productName: this.productName,
       products: this.products,
@@ -165,11 +216,16 @@ export class Order implements Required<OrderConstructorContext> {
       orderId: this.orderId,
       locale: this.locale,
       conversationId: this.conversationId,
-      buyer: this.buyer
+      buyer: this.buyer,
+      created: this.created,
+      refunded: this.refunded
     };
   }
 
-  static fromJSON(client: Client, json: Required<OrderConstructorContext>): Order {
-    return new Order(client, json);
+  static fromJSON(client: Client, json: Required<OrderConstructorContext & { created: boolean, refunded: boolean }>): Order {
+    const order = new Order(client, json);
+    order.created ??= json.created;
+    order.refunded ??= json.refunded;
+    return order;
   }
 }
