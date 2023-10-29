@@ -67,7 +67,7 @@ export class Order implements Required<OrderConstructorContext> {
   paymentUrl: URL;
   valletId: number;
 
-  constructor(private client: Client, ctx: OrderConstructorContext) {
+  constructor(private client: Client, ctx: OrderConstructorContext, mute: boolean = false) {
     this.productName = ctx.productName ?? this.client.defaults.productName;
     this.products = ctx.products;
     this.productType = ctx.productType ?? this.client.defaults.productType;
@@ -86,8 +86,9 @@ export class Order implements Required<OrderConstructorContext> {
       if (product.productName.length > 200) throw new Error(`[Order] products[${i}].productName cannot be longer than 200 characters`);
       if (!product.productType) product.productType = this.productType;
     });
-
-    this.client.orders.add(this);
+    
+    if (mute) this.client.orders.cache.set(this.orderId, this);
+    else this.client.orders.add(this);
   }
 
   async create(): Promise<Order> {

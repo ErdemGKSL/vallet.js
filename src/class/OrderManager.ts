@@ -13,7 +13,6 @@ export class OrderManager extends EventEmitter {
   }
 
   add(order: Order): Order {
-    if (this.cache.has(order.orderId)) throw new Error("Order already exists");
     this.cache.set(order.orderId, order);
     this.emit("add", order);
     return order;
@@ -38,8 +37,8 @@ export class OrderManager extends EventEmitter {
     return true;
   }
 
-  async addBulk(orders: SaveableOrder[]): Promise<this> {
-    this.emit("bulkAdd", orders.map(order => this.add(new Order(this.client, order))));
+  addBulk(orders: SaveableOrder[]): this {
+    this.emit("bulkAdd", orders.map(order => new Order(this.client, order, true)));
     return this;
   }
 
