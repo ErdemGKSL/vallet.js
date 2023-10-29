@@ -4,7 +4,7 @@ import { CallbackManager } from "./CallbackManager";
 import { OrderManager } from "./OrderManager";
 import { Router, Express } from "express";
 
-interface ClientConstructorContext {
+export interface ClientConstructorContext {
   username: string;
   password: string;
   shopCode: string;
@@ -12,10 +12,6 @@ interface ClientConstructorContext {
   callbackOkUrl: string;
   apiHash: string;
   defaults?: ClientConstructorDefaults;
-  data?: {
-    getOrders?: () => Promise<Required<OrderConstructorContext>[]>;
-    saveOrders?: (orders: Required<OrderConstructorContext>[], added?: OrderConstructorContext, removed?: OrderConstructorContext) => Promise<void> | void;
-  };
 }
 
 
@@ -66,7 +62,7 @@ export class Client extends CallbackManager {
     this.callbackOkUrlString = ctx.callbackOkUrl;
     this.callbackFailUrlString = ctx.callbackFailUrl;
     
-    this.orders = new OrderManager(ctx.data ?? {}, this);
+    this.orders = new OrderManager(this);
     this.defaults = stuffs.defaultify(ctx.defaults ?? {}, {
       productName: "Ödeme",
       productType: "DIJITAL_URUN",

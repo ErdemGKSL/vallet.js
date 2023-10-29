@@ -1,29 +1,21 @@
-import { Client } from "./Client";
+import EventEmitter from "stream";
+import { Client, ClientConstructorContext } from "./Client";
 import { Order, OrderConstructorContext } from "./Order";
 import { OrderCollection } from "./OrderCollection";
 
-interface OrderManagerConstructorContext {
-  getOrders?: () => Promise<OrderConstructorContext[]>;
-  saveOrders?: (orders: OrderConstructorContext[], added?: OrderConstructorContext, removed?: OrderConstructorContext) => Promise<void> | void;
-}
+// type OrderManagerConstructorContext = ClientConstructorContext["data"];
+type SaveableOrder = OrderConstructorContext & { created: boolean, refunded: boolean }
 
-export class OrderManager {
-  getOrders: () => Promise<OrderConstructorContext[]>;
-  saveOrders: (orders: OrderConstructorContext[], added?: OrderConstructorContext, removed?: OrderConstructorContext) => Promise<void> | void;
-  cache: OrderCollection;
-  constructor(ctx: OrderManagerConstructorContext, private client: Client) {
-    this.getOrders = ctx.getOrders ?? (async () => []);
-    this.saveOrders = ctx.saveOrders ?? (() => {});
-    this.cache = new OrderCollection([]);
-    this.getOrders().then(orders => {
-      this.cache = new OrderCollection(orders.map(order => new Order(this.client, order)));
-    });
+export class OrderManager extends EventEmitter {
+  cache: OrderCollection = new OrderCollection([]);
+  constructor(private client: Client) {
+    super();
   }
 
-  async add(order: Order): Promise<Order> {
+  add(order: Order): Order {
     if (this.cache.has(order.orderId)) throw new Error("Order already exists");
     this.cache.set(order.orderId, order);
-    await this.saveOrders(this.cache.saveable, order.toJSON(), null);
+    this.emit("add", order);
     return order;
   }
 
@@ -38,12 +30,32 @@ export class OrderManager {
     return this.cache.get(orderId);
   }
 
-  async remove(orderId: string): Promise<boolean> {
+  remove(orderId: string): boolean {
     if (!this.cache.has(orderId)) return false;
     const order = this.cache.get(orderId);
     this.cache.delete(orderId);
-    await this.saveOrders(this.cache.saveable, null, order.toJSON());
+    this.emit("remove", order);
     return true;
   }
 
+  async addBulk(orders: SaveableOrder[]): Promise<this> {
+    this.emit("bulkAdd", orders.map(order => this.add(new Order(this.client, order))));
+    return this;
+  }
+
+  override on(event: "add", listener: (order: Order) => void): this;
+  override on(event: "remove", listener: (order: Order) => void): this;
+  override on(event: "bulkAdd", listener: (orders: Order[]) => void): this;
+
+  override on(event: string, listener: (...args: any[]) => void): this {
+    return super.on(event, listener);
+  }
+
+  override emit(event: "add", order: Order): boolean;
+  override emit(event: "remove", order: Order): boolean;
+  override emit(event: "bulkAdd", orders: Order[]): boolean;
+
+  override emit(event: string, ...args: any[]): boolean {
+    return super.emit(event, ...args);
+  }
 }
