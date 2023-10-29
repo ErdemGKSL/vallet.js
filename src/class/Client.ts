@@ -1,7 +1,6 @@
 import stuffs from "stuffs";
 import { Order, OrderConstructorContext } from "./Order";
 import { CallbackManager } from "./CallbackManager";
-import Crypto from "crypto";
 import { OrderManager } from "./OrderManager";
 import { Router, Express } from "express";
 
@@ -84,14 +83,5 @@ export class Client extends CallbackManager {
 
   override bind<T extends Router | Express>(router: T, path: string): T {
     return super.bind(router, path, this);
-  }
-
-  /**
-   * @param args string arguments
-   * @example
-   * const hash = client.calculateHash(client.username, client.password, client.shopCode, client.apiHash);
-   */
-  calculateHash(...args: string[]): string {
-    return Crypto.createHash("sha1").update(args.join("")).digest("base64")
   }
 };

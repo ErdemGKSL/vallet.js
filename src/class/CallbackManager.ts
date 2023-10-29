@@ -2,6 +2,7 @@ import { EventEmitter } from "stream";
 import { Router, Express } from "express";
 import { Order } from "./Order";
 import { Client } from "./Client";
+import Crypto from "crypto";
 
 type paymentStatus = "paymentWait" | "paymentVerification" | "paymentOk" | "paymentNotPaid";
 
@@ -41,6 +42,9 @@ export interface CallbackData {
    */
   valletOrderId: string;
   valletOrderNumber: string;
+
+  checkHash: () => boolean;
+  calculateHash: () => string;
 }
 
 export class CallbackManager extends EventEmitter {
@@ -57,15 +61,42 @@ export class CallbackManager extends EventEmitter {
   }
   
   bind<T extends Router | Express>(router: T, path: string, client: Client): T {
-    return (router as any).post(path, (req, res) => {
+    return (router as Router).post(path, (req, res) => {
       //@ts-ignore
       this.emit("raw", { ...(req.body ?? {})});
       const data = (req.body as (CallbackData & { paymentStatus: paymentStatus }));
       if (data.paymentTime) data.paymentTime = new Date(data.paymentTime + " GMT+3");
       const status = data.paymentStatus;
       delete data.paymentStatus;
+
+      data.calculateHash = () => {
+        return this.calculateHash(
+          data.orderId,
+          data.paymentCurrency,
+          data.paymentAmount?.toString(),
+          data.paymentAmount?.toString(),
+          data.productType,
+          client.shopCode,
+          client.apiHash
+        );
+      }
+
+      data.checkHash = () => {
+        const expectedHash = data.calculateHash();
+        return expectedHash === data.hash;
+      }
+
       this.emit(status, client.orders.cache.get(data.orderId), data);
       res.send('OK');
-    });
+    }) as T;
+  }
+
+  /**
+   * @param args string arguments
+   * @example
+   * const hash = client.calculateHash(client.username, client.password, client.shopCode, client.apiHash);
+   */
+  calculateHash(...args: string[]): string {
+    return Crypto.createHash("sha1").update(args.join("")).digest("base64")
   }
 }
