@@ -27,7 +27,14 @@ export class OrderManager {
     return order;
   }
 
+  /**
+   * @deprecated instead use OrderManager#resolve
+   */
   get(orderId: string): Order | undefined {
+    return this.cache.get(orderId);
+  }
+
+  resolve(orderId: string): Order | undefined {
     return this.cache.get(orderId);
   }
 
@@ -38,4 +45,5 @@ export class OrderManager {
     await this.saveOrders(this.cache.saveable, null, order.toJSON());
     return true;
   }
+
 }

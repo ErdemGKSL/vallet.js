@@ -86,7 +86,7 @@ export class CallbackManager extends EventEmitter {
         return expectedHash === data.hash;
       }
 
-      this.emit(status, client.orders.cache.get(data.orderId), data);
+      this.emit(status, client.orders.resolve(data.orderId), data);
       res.send('OK');
     }) as T;
   }
