@@ -30,6 +30,9 @@ export interface OrderConstructorContext {
    */
   conversationId?: string;
   buyer: Buyer;
+
+  paymentUrl?: URL;
+  valletId?: number;
 }
 
 export interface Buyer {
@@ -73,6 +76,9 @@ export class Order implements Required<OrderConstructorContext> {
     this.locale = ctx.locale ?? this.client.defaults.locale;
     this.conversationId = ctx.conversationId;
     this.buyer = ctx.buyer;
+
+    this.paymentUrl = ctx.paymentUrl;
+    this.valletId = ctx.valletId;
 
     if (this.productName.length > 200) throw new Error("[Order] productName cannot be longer than 200 characters");
     if (this.conversationId && this.conversationId.length > 200) throw new Error("[Order] conversationId cannot be longer than 200 characters");
@@ -218,7 +224,9 @@ export class Order implements Required<OrderConstructorContext> {
       conversationId: this.conversationId,
       buyer: this.buyer,
       created: this.created,
-      refunded: this.refunded
+      refunded: this.refunded,
+      paymentUrl: this.paymentUrl,
+      valletId: this.valletId
     };
   }
 
