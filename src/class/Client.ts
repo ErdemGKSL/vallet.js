@@ -1,6 +1,6 @@
 import stuffs from "stuffs";
 import { Order, OrderConstructorContext } from "./Order";
-import { CallbackManager } from "./CallbackManager";
+import { CallbackData, CallbackManager } from "./CallbackManager";
 import { OrderManager } from "./OrderManager";
 import { Router, Express } from "express";
 
@@ -79,5 +79,9 @@ export class Client extends CallbackManager {
 
   override bind<T extends Router | Express>(router: T, path: string): T {
     return super.bind(router, path, this);
+  }
+  
+  override parseRequest(data: Omit<CallbackData, "checkHash" | "calculateHash" | "paymentTime"> & { paymentStatus: "paymentWait" | "paymentVerification" | "paymentOk" | "paymentNotPaid" }): { status: "paymentWait" | "paymentVerification" | "paymentOk" | "paymentNotPaid", order: Order | undefined, data: CallbackData } {
+      return super.parseRequest(data, this);
   }
 };

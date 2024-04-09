@@ -52,24 +52,21 @@ export class CallbackManager extends EventEmitter {
     super();
   }
 
-  public override on(event: paymentStatus, listener: (order: Order, data: CallbackData) => void): this {
+  public override on(event: paymentStatus, listener: (order: Order | undefined, data: CallbackData) => void): this {
     return super.on(event, listener);
   }
 
-  public override emit(event: paymentStatus, order: Order, data: CallbackData): boolean {
+  public override emit(event: paymentStatus, order: Order | undefined, data: CallbackData): boolean {
     return super.emit(event, order, data);
   }
-  
-  bind<T extends Router | Express>(router: T, path: string, client: Client): T {
-    return (router as Router).post(path, (req, res) => {
-      //@ts-ignore
-      this.emit("raw", { ...(req.body ?? {})});
-      const data = (req.body as (CallbackData & { paymentStatus: paymentStatus }));
-      if (data.paymentTime) data.paymentTime = new Date(data.paymentTime + " GMT+3");
+
+  parseRequest(data: Omit<CallbackData, "checkHash" | "calculateHash" | "paymentTime"> & { paymentStatus: paymentStatus }, client: Client): { status: paymentStatus, order: Order | undefined, data: CallbackData } {
+    
+      if ((data as any).paymentTime) (data as any).paymentTime = new Date((data as any).paymentTime + " GMT+3");
       const status = data.paymentStatus;
       delete data.paymentStatus;
 
-      data.calculateHash = () => {
+      (data as any).calculateHash = () => {
         return this.calculateHash(
           data.orderId,
           data.paymentCurrency,
@@ -81,12 +78,24 @@ export class CallbackManager extends EventEmitter {
         );
       }
 
-      data.checkHash = () => {
-        const expectedHash = data.calculateHash();
+      (data as any).checkHash = () => {
+        const expectedHash = (data as any).calculateHash();
         return expectedHash === data.hash;
       }
 
-      this.emit(status, client.orders.resolve(data.orderId), data);
+    return {
+      status,
+      order: client.orders.resolve(data.orderId),
+      data: data as any
+    }
+  }
+  
+  bind<T extends Router | Express>(router: T, path: string, client: Client): T {
+    return (router as Router).post(path, (req, res) => {
+      //@ts-ignore
+      this.emit("raw", { ...(req.body ?? {})});
+      const { data, order, status } = this.parseRequest(req.body, client);
+      this.emit(status, order, data);
       res.send('OK');
     }) as T;
   }
